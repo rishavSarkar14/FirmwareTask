@@ -1,0 +1,4 @@
+avr-gcc -g -Os -mmcu=atmega328p -DF_CPU=16000000UL -c Peripheral.c
+avr-gcc -g -mmcu=atmega328p -o Peripheral.elf Peripheral.o
+avr-objcopy -j .text -j .data -O ihex Peripheral.elf Peripheral.hex
+avr-size --format=avr --mcu=atmega328p Peripheral.elf
