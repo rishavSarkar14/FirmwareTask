@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define BAUD 2400 // Desired Baud Rate
-#define BAUD_PRESCALER (((CLK_SYS / (BAUD * 16UL))) - 1)
+#define BAUD_PRESCALER CLK_SYS/BAUD/16 - 1
 
 #define ASYNC (0<<UMSEL00) // USART Mode Selection
 #define PARITY  (0<<UPM00) // USART Parity Bit Selection
@@ -22,8 +22,8 @@ static int pointer = 0;
 void USART_Init()
 {
 	// Set Baud Rate
-	UBRR0H = BAUD_PRESCALER >> 8;
-	UBRR0L = BAUD_PRESCALER;
+	UBRR0H = (unsigned char)BAUD_PRESCALER >> 8;
+	UBRR0L = (unsigned char)BAUD_PRESCALER;
 	
 	// Set Frame Format
 	UCSR0C = ASYNC | PARITY | STOP_BIT | DATA_BIT;
@@ -54,21 +54,21 @@ int main()
 	USART_Init();
 	while (1)
 	{
-    uint8_t ch = uart_getc();
-    eeprom_write_byte((uint8_t*)pointer, ch);
-    pointer++;
-    eeprom_busy_wait();
+	    uint8_t ch = uart_getc();
+	    eeprom_write_byte((uint8_t*)pointer, ch);
+	    pointer++;
+	    eeprom_busy_wait();
 
-    if(!ch)
-    {
-      for(int i = 0; i < pointer; i++)
-      {
-        uint8_t val = eeprom_read_byte((uint8_t*)i);
-        uart_putc(val);
-        eeprom_busy_wait();
-      }
-      pointer = 0;
-    }
+	    if(!ch)
+	    {
+		      for(int i = 0; i < pointer; i++)
+		      {
+		        uint8_t val = eeprom_read_byte((uint8_t*)i);
+		        uart_putc(val);
+		        eeprom_busy_wait();
+		      }
+	      pointer = 0;
+	    }
 	}
 	return 0;
 }
